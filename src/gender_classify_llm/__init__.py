@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Literal, TypedDict
 
 import ollama
-
+from rich.status import Status
 
 # Defining the system prompt for the gender classification task
 SYSTEM_PROMPT = """
@@ -69,11 +69,39 @@ class GenderClassifier:
         """
         Initialize the GenderClassifyLLM model with a specified model name.
         Args:
-            model (str, optional): The name of the model to use. Defaults to "**qwen3-vl:4b-instruct**".
+            model (str, optional): The name of the vision language model to use. Defaults to "**qwen3-vl:4b-instruct**".
+        """
+        with Status(
+            f"Loading model [bold green]{model}[/bold green]...",
+            spinner_style="bold green",
+        ) as status:
+            self.model = model
+            self.__system_prompt__ = SYSTEM_PROMPT
+            status.update(
+                f"Warming up model [bold green]{model}[/bold green]...",
+                spinner_style="bold orange1",
+            )
+            self.generate(prompt="Hello! Are you ready for the tasks ahead?")
+
+    def generate(self, prompt: str, image: Path | str | None = None) -> str:
+        """
+        Generate a response using the Ollama model based on the provided prompt and optional image.
+        Args:
+            prompt (str): The text prompt to generate a response for.
+            image (Path | str | None, optional): The image path or string to include in the generation. If None, no image is included.
+        Returns:
+            str: The generated response from the model.
+        Example:
+            >>> response = generator.generate("What is the weather like?", "path/to/image.jpg")
+            >>> print(response)
         """
 
-        self.model = model
-        self.__system_prompt__ = SYSTEM_PROMPT
+        return ollama.generate(
+            model=self.model,
+            system=self.__system_prompt__,
+            images=[str(image)] if image else None,
+            prompt=prompt,
+        ).response
 
     def predict(self, image: Path | str) -> Prediction:
         """Predict the gender of a person in an image using an LLM model.
@@ -82,11 +110,9 @@ class GenderClassifier:
         Returns:
             Prediction: A Prediction object containing the predicted gender, confidence, and reason.
         """
-        response = ollama.generate(
-            model=self.model,
-            system=self.__system_prompt__,
-            images=[str(image)],
-            prompt="Predict the gender from the image provided.",
-        ).response
+
+        response = self.generate(
+            prompt="Predict the gender from the image provided.", image=image
+        )
         result: Prediction = loads(response)
         return result
