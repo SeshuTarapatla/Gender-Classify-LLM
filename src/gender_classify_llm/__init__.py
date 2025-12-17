@@ -7,6 +7,7 @@ from typing import Literal, TypedDict
 import ollama
 from rich.status import Status
 
+
 # Defining the system prompt for the gender classification task
 SYSTEM_PROMPT = """
 You are a strict binary classification system.
@@ -72,15 +73,12 @@ class GenderClassifier:
             model (str, optional): The name of the vision language model to use. Defaults to "**qwen3-vl:4b-instruct**".
         """
         with Status(
-            f"Loading model [bold green]{model}[/bold green]...",
-            spinner_style="bold green",
-        ) as status:
+            f"Loading the model [green]{model}[/green]...",
+            spinner_style="green",
+        ):
             self.model = model
             self.__system_prompt__ = SYSTEM_PROMPT
-            status.update(
-                f"Warming up model [bold green]{model}[/bold green]...",
-                spinner_style="bold orange1",
-            )
+
             self.generate(prompt="Hello! Are you ready for the tasks ahead?")
 
     def generate(self, prompt: str, image: Path | str | None = None) -> str:
