@@ -1,6 +1,6 @@
 [project]
 name = "gender-classify-llm"
-version = "0.1.0"
+version = "0.1.1"
 description = "A lightweight Python wrapper library that predicts the gender of a person in an image using local Ollama Vision-Language models."
 readme = "README.md"
 authors = [
