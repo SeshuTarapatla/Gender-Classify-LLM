@@ -9,11 +9,22 @@ __all__ = []
 
 
 class Client(_Client):
+    """
+    A custom extended version of the ollama.Client class that provides additional functionality.
+    """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def exists(self, model: str = "") -> None:
+        """Check if Ollama is installed and optionally pull a specific model.
+
+        Args:
+            model (str, optional): The name of the model to check. If not provided, only checks if Ollama is installed.
+
+        Raises:
+            SystemExit: If Ollama is not installed or if the model could not be pulled.
+        """
         if which("ollama") is None:
             from rich.table import Table
             from rich.panel import Panel
@@ -49,9 +60,17 @@ class Client(_Client):
                     print(f"Failed to pull the model: {model}")
                     exit(1)
 
+    def is_running(self, model: str) -> bool:
+        """
+        Check if a specific Ollama model is currently loaded and running.
+
+        Args:
+            model (str): The name of the model to check.
+
+        Returns:
+            bool: True if the model is running, False otherwise.
+        """
+        return model in [m.model for m in self.ps().models]
+
 
 ollama = Client()
-
-
-if __name__ == "__main__":
-    ollama.exists("gemma")
